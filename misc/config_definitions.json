@@ -3734,24 +3734,178 @@
             "type": "text"
         },
         "leaflet.default_lat": {
-            "default": 51.4800,
-            "type": "float"
+            "default": 0.0,
+            "type": "text",
+            "group": "webui",
+            "section": "worldmap",
+            "order": 2
         },
         "leaflet.default_lng": {
-            "default": 0,
-            "type": "float"
+            "default": 0.0,
+            "type": "text",
+            "group": "webui",
+            "section": "worldmap",
+            "order": 3
         },
         "leaflet.default_zoom": {
             "default": 2,
-            "type": "integer"
+            "type": "integer",
+            "group": "webui",
+            "section": "worldmap",
+            "order": 4
         },
         "leaflet.group_radius": {
             "default": 10,
-            "type": "integer"
+            "type": "integer",
+            "group": "webui",
+            "section": "worldmap",
+            "order": 5
         },
         "leaflet.tile_url": {
             "default": "{s}.tile.openstreetmap.org",
-            "type": "text"
+            "type": "text",
+            "group": "webui",
+            "section": "worldmap",
+            "order": 6
+        },
+        "leaflet.critical_circle_color": {
+            "default": "red",
+            "type": "text",
+            "group": "webui",
+            "section": "worldmap",
+            "order": 7
+        },
+        "leaflet.warning_circle_color": {
+            "default": "orange",
+            "type": "text",
+            "group": "webui",
+            "section": "worldmap",
+            "order": 8
+        },
+        "leaflet.ok_circle_color": {
+            "default": "green",
+            "type": "text",
+            "group": "webui",
+            "section": "worldmap",
+            "order": 9
+        },
+        "leaflet.maintenance_circle_color": {
+            "default": "gray",
+            "type": "text",
+            "group": "webui",
+            "section": "worldmap",
+            "order": 7
+        },
+        "leaflet.critical_icon_color": {
+            "default": "white",
+            "type": "text",
+            "group": "webui",
+            "section": "worldmap",
+            "order": 7
+        },
+        "leaflet.warning_icon_color": {
+            "default": "white",
+            "type": "text",
+            "group": "webui",
+            "section": "worldmap",
+            "order": 8
+        },
+        "leaflet.ok_icon_color": {
+            "default": "white",
+            "type": "text",
+            "group": "webui",
+            "section": "worldmap",
+            "order": 9
+        },
+        "leaflet.maintenance_icon_color": {
+            "default": "white",
+            "type": "text",
+            "group": "webui",
+            "section": "worldmap",
+            "order": 10
+        },
+        "leaflet.server_icon": {
+            "default": "desktop",
+            "type": "text",
+            "group": "webui",
+            "section": "worldmap",
+            "order": 11
+        },
+        "leaflet.appliance_icon": {
+            "default": "desktop",
+            "type": "text",
+            "group": "webui",
+            "section": "worldmap",
+            "order": 12
+        },
+        "leaflet.firewall_icon": {
+            "default": "sitemap",
+            "type": "text",
+            "group": "webui",
+            "section": "worldmap",
+            "order": 13
+        },
+        "leaflet.network_icon": {
+            "default": "server",
+            "type": "text",
+            "group": "webui",
+            "section": "worldmap",
+            "order": 14
+        },
+        "leaflet.storage_icon": {
+            "default": "database",
+            "type": "text",
+            "group": "webui",
+            "section": "worldmap",
+            "order": 15
+        },
+          "leaflet.wireless_icon": {
+            "default": "wifi",
+            "type": "text",
+            "group": "webui",
+            "section": "worldmap",
+            "order": 16
+        },
+        "leaflet.printer_icon": {
+            "default": "print",
+            "type": "text",
+            "group": "webui",
+            "section": "worldmap",
+            "order": 17
+        },
+        "leaflet.environment_icon": {
+            "default": "thermometer",
+            "type": "text",
+            "group": "webui",
+            "section": "worldmap",
+            "order": 18
+        },
+        "leaflet.power_icon": {
+            "default": "plug",
+            "type": "text",
+            "group": "webui",
+            "section": "worldmap",
+            "order": 19
+        },
+        "leaflet.owm_api": {
+            "default": null,
+            "type": "text",
+            "group": "webui",
+            "section": "weathermap",
+            "order": 1
+        },
+        "leaflet.owm_default_layer": {
+            "default": "rain",
+            "type": "select",
+            "options": {
+                "rain": "Rain",
+                "snow": "Snow",
+                "temperature": "Temperature",
+                "wind": "Wind"
+            },
+            "group": "webui",
+            "section": "weathermap",
+            "order": 2
         },
         "libvirt_protocols": {
             "default": [

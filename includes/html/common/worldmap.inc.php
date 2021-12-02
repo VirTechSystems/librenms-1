@@ -27,62 +27,181 @@ use LibreNMS\Config;
 
 $install_dir = Config::get('install_dir');
 
+$types = array('server', 'appliance', 'firewall', 'network', 'storage', 'wireless', 
+    'printer', "power", "environment");
+$default_icons = array('server' => 'desktop', 'appliance' => 'desktop', 'firewall' => 'sitemap',
+    'network' => 'server', 'storage' => 'database', 'wireless' => 'wifi', 'printer' => 'print',
+    'power' => 'plug', 'environment' => 'thermometer');
+    
 if (Config::get('map.engine', 'leaflet') == 'leaflet') {
-    $temp_output = '
-<script src="js/leaflet.js"></script>
-<script src="js/leaflet.markercluster.js"></script>
-<script src="js/leaflet.awesome-markers.min.js"></script>
-<div id="leaflet-map"></div>
-<script>
-        ';
     $init_lat = Config::get('leaflet.default_lat', 51.48);
     $init_lng = Config::get('leaflet.default_lng', 0);
     $init_zoom = Config::get('leaflet.default_zoom', 5);
     $group_radius = Config::get('leaflet.group_radius', 80);
     $tile_url = Config::get('leaflet.tile_url', '{s}.tile.openstreetmap.org');
+
+    $critical_circle_color = Config::get('leaflet.critical_circle_color', 'red');
+    $warning_circle_color = Config::get('leaflet.warning_circle_color', 'orange');
+    $ok_circle_color = Config::get('leaflet.ok_circle_color', 'green');
+    $maintenance_circle_color = Config::get('leaflet.maintenance_circle_color', 'gray');
+
+    $critical_icon_color = Config::get('leaflet.critical_icon_color', 'white');
+    $warning_icon_color = Config::get('leaflet.warning_icon_color', 'white');
+    $ok_icon_color = Config::get('leaflet.ok_icon_color', 'white');
+    $maintenance_icon_color = Config::get('leaflet.maintenance_icon_color', 'white');
+
+    $owm_api = Config::get('leaflet.owm_api', null);
+    $owm_default_layer = Config::get('leaflet.owm_default_layer', 'rain');
+    $temp_output = '
+<script src="js/leaflet.js"></script>
+<script src="js/leaflet-openweathermap.js"></script>
+<script src="js/leaflet.markercluster.js"></script>
+<script src="js/leaflet.awesome-markers.min.js"></script>
+<div id="leaflet-map"></div>
+<style>
+    .criticalCluster {
+        background-color: '.$critical_circle_color.';
+        text-align: center;
+        width: 25px !important;
+        height: 25px !important;
+        font-size: 14px;
+        color: '.$critical_icon_color.';
+        border-color: transparent;
+    }
+    .warningCluster {
+        background-color: '.$warning_circle_color.';
+        text-align: center;
+        width: 25px !important;
+        height: 25px !important;
+        font-size: 14px;
+        color: '.$warning_icon_color.';
+        border-color: transparent;
+    }
+    .okCluster {
+        background-color: '.$ok_circle_color.';
+        text-align: center;
+        width: 25px !important;
+        height: 25px !important;
+        font-size: 14px;
+        color: '.$ok_icon_color.';
+        border-color: transparent;
+    }
+    .maintenanceCluster {
+        background-color: '.$maintenance_circle_color.';
+        text-align: center;
+        width: 25px !important;
+        height: 25px !important;
+        font-size: 14px;
+        color: '.$maintenance_icon_color.';
+        border-color: transparent;
+    }
+</style>
+<script>
+        ';
+
     $show_status = [0, 1];
     $map_init = '[' . $init_lat . ', ' . $init_lng . '], ' . sprintf('%01.1f', $init_zoom);
     $temp_output .= 'var map = L.map(\'leaflet-map\', { zoomSnap: 0.1 } ).setView(' . $map_init . ');
-L.tileLayer(\'//' . $tile_url . '/{z}/{x}/{y}.png\', {
+var osm = L.tileLayer(\'//' . $tile_url . '/{z}/{x}/{y}.png\', {
     attribution: \'&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors\'
 }).addTo(map);
+';
 
+if ($owm_api != null) {
+    if ($owm_default_layer == "rain") {
+        $temp_output .= 'var rain = L.OWM.rain({showLegend: false, opacity: 0.5, appId: \''.$owm_api.'\'}).addTo(map);';
+    } else {
+        $temp_output .= 'var rain = L.OWM.rain({showLegend: false, opacity: 0.5, appId: \''.$owm_api.'\'});';
+    }
+
+    if ($owm_default_layer == "snow") {
+        $temp_output .= 'var snow = L.OWM.snow({showLegend: false, opacity: 0.5, appId: \''.$owm_api.'\'}).addTo(map);';
+    } else {
+        $temp_output .= 'var snow = L.OWM.snow({showLegend: false, opacity: 0.5, appId: \''.$owm_api.'\'});';
+    }
+    
+    if ($owm_default_layer == "temperature") {
+        $temp_output .= 'var temp = L.OWM.temperature({showLegend: false, opacity: 0.5, appId: \''.$owm_api.'\'}).addTo(map);';
+    } else {
+        $temp_output .= 'var temp = L.OWM.temperature({showLegend: false, opacity: 0.5, appId: \''.$owm_api.'\'});';
+    }
+    
+    if ($owm_default_layer == "wind") {
+        $temp_output .= 'var wind = L.OWM.wind({showLegend: false, opacity: 0.5, appId: \''.$owm_api.'\'}).addTo(map);';
+    } else {
+        $temp_output .= 'var wind = L.OWM.wind({showLegend: false, opacity: 0.5, appId: \''.$owm_api.'\'});';
+    }
+    
+    $temp_output .= '
+var baseMaps = { "Standard": osm };
+var overlayMaps = { "Rain": rain, "Temp": temp, "Snow": snow, "Wind": wind };
+var layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
+';
+}
+
+    $temp_output .= '
 var markers = L.markerClusterGroup({
     maxClusterRadius: ' . $group_radius . ',
     iconCreateFunction: function (cluster) {
         var markers = cluster.getAllChildMarkers();
-        var n = 0;
-        color = "green"
-        newClass = "Cluster marker-cluster marker-cluster-small leaflet-zoom-animated leaflet-clickable";
+        color = "okCluster";
+        var zIndex = 20000;
+        newClass = " marker-cluster marker-cluster-small leaflet-zoom-animated leaflet-clickable";
         for (var i = 0; i < markers.length; i++) {
-            if (markers[i].options.icon.options.markerColor == "blue" && color != "red") {
-                color = "blue";
-            }
-            if (markers[i].options.icon.options.markerColor == "red") {
-                color = "red";
+            if (markers[i].options.icon.options.markerColor == "'.$maintenance_circle_color.'" && color != "'.$critical_circle_color.'" && color != "'.$warning_circle_color.'") {
+                color = "maintenanceCluster";
+                zIndex = 5000;
+                break;
+            } else if (markers[i].options.icon.options.markerColor == "'.$warning_circle_color.'" && color != "'.$critical_circle_color.'") {
+                if (markers[i].options.icon != printerWarningMarker) {
+                    color = "warningCluster";
+                    zIndex = 25000;
+                }
+            } else if (markers[i].options.icon.options.markerColor == "'.$critical_circle_color.'") {
+                if (markers[i].options.icon != printerCriticalMarker) {
+                    color = "criticalCluster";
+                    zIndex = 30000;
+                    break;
+                }
             }
         }
-        return L.divIcon({ html: cluster.getChildCount(), className: color+newClass, iconSize: L.point(40, 40) });
+        return L.divIcon(
+            {
+                html: cluster.getChildCount(), 
+                className: color+newClass, 
+                iconSize: L.point(40, 40), 
+                zIndexOffset: zIndex 
+            }
+        );
     },
   });
-var redMarker = L.AwesomeMarkers.icon({
-    icon: \'server\',
-    markerColor: \'red\', prefix: \'fa\', iconColor: \'white\'
+';
+
+foreach ($types as $type) {
+    $temp_output .= '
+var '.$type.'CriticalMarker = L.AwesomeMarkers.icon({
+    icon: \''.Config::get('leaflet.'.$type.'_icon', $default_icons[$type]).'\',
+    markerColor: \''.$critical_circle_color.'\', prefix: \'fa\', iconColor: \''.$critical_icon_color.'\'
   });
-var blueMarker = L.AwesomeMarkers.icon({
-      icon: \'server\',
-      markerColor: \'blue\', prefix: \'fa\', iconColor: \'white\'
+var '.$type.'MaintenanceMarker = L.AwesomeMarkers.icon({
+      icon: \''.Config::get('leaflet.'.$type.'_icon', $default_icons[$type]).'\',
+      markerColor: \''.$maintenance_circle_color.'\', prefix: \'fa\', iconColor: \''.$maintenance_icon_color.'\'
     });
-var greenMarker = L.AwesomeMarkers.icon({
-    icon: \'server\',
-    markerColor: \'green\', prefix: \'fa\', iconColor: \'white\'
+var '.$type.'OkMarker = L.AwesomeMarkers.icon({
+    icon: \''.Config::get('leaflet.'.$type.'_icon', $default_icons[$type]).'\',
+    markerColor: \''.$ok_circle_color.'\', prefix: \'fa\', iconColor: \''.$ok_icon_color.'\'
   });
-        ';
+var '.$type.'WarningMarker = L.AwesomeMarkers.icon({
+    icon: \''.Config::get('leaflet.'.$type.'_icon', $default_icons[$type]).'\',
+    markerColor: \''.$warning_circle_color.'\', prefix: \'fa\', iconColor: \''.$warning_icon_color.'\'
+  });
+';
+}
 
     // Checking user permissions
     if (Auth::user()->hasGlobalRead()) {
         // Admin or global read-only - show all devices
-        $sql = "SELECT DISTINCT(`device_id`),`location`,`sysName`,`hostname`,`os`,`status`,`lat`,`lng` FROM `devices`
+        $sql = "SELECT DISTINCT(`device_id`),`location`,`sysName`,`hostname`,`os`,`status`,`lat`,`lng`, `type`,`uptime` FROM `devices`
                 LEFT JOIN `locations` ON `devices`.`location_id`=`locations`.`id`
                 WHERE `disabled`=0 AND `ignore`=0 AND ((`lat` != '' AND `lng` != '') OR (`location` REGEXP '\[[0-9\.\, ]+\]'))
                 AND (`lat` IS NOT NULL AND `lng` IS NOT NULL)
@@ -93,7 +212,7 @@ var greenMarker = L.AwesomeMarkers.icon({
         // Normal user - grab devices that user has permissions to
         $device_ids = Permissions::devicesForUser()->toArray() ?: [0];
 
-        $sql = "SELECT DISTINCT(`devices`.`device_id`) as `device_id`,`location`,`sysName`,`hostname`,`os`,`status`,`lat`,`lng`
+        $sql = "SELECT DISTINCT(`devices`.`device_id`) as `device_id`,`location`,`sysName`,`hostname`,`os`,`status`,`lat`,`lng`,`type`,`uptime`
                 FROM `devices`
                 LEFT JOIN `locations` ON `devices`.location_id=`locations`.`id`
                 WHERE `disabled`=0 AND `ignore`=0 AND ((`lat` != '' AND `lng` != '') OR (`location` REGEXP '\[[0-9\.\, ]+\]'))
@@ -104,30 +223,33 @@ var greenMarker = L.AwesomeMarkers.icon({
         $param = array_merge($device_ids, $show_status);
     }
 
+    $uptime_warn = Config::get('uptime_warning', 84600);
     foreach (dbFetchRows($sql, $param) as $map_devices) {
-        $icon = 'greenMarker';
+        $icon = $map_devices['type'] . 'OkMarker';
         $z_offset = 0;
         $tmp_loc = parse_location($map_devices['location']);
+        
         if (is_numeric($tmp_loc['lat']) && is_numeric($tmp_loc['lng'])) {
             $map_devices['lat'] = $tmp_loc['lat'];
             $map_devices['lng'] = $tmp_loc['lng'];
         }
-        if ($map_devices['status'] == 0) {
-            if (AlertUtil::isMaintenance($map_devices['device_id'])) {
-                if ($show_status == 0) { // Don't show icon if only down devices should be shown
-                    continue;
-                } else {
-                    $icon = 'blueMarker';
-                    $z_offset = 5000;
-                }
-            } else {
-                $icon = 'redMarker';
-                $z_offset = 10000;  // move marker to foreground
+        
+        if (AlertUtil::isMaintenance($map_devices['device_id'])) {
+            $icon = $map_devices['type'] . 'MaintenanceMarker';
+            $z_offset = 5000;
+        } else if ($map_devices['status'] == 0) {
+            $icon = $map_devices['type'] . 'CriticalMarker';
+            $z_offset = 10000;
+        } else {
+            if (($map_devices['uptime'] < $uptime_warn) && ($map_devices['uptime'] != 0)) {
+                $icon = $map_devices['type'] . 'WarningMarker';
+                $z_offset = 5000;
             }
         }
+        
         $temp_output .= "var title = '<a href=\"" . \LibreNMS\Util\Url::deviceUrl((int) $map_devices['device_id']) . '"><img src="' . getIcon($map_devices) . '" width="32" height="32" alt=""> ' . format_hostname($map_devices) . "</a>';
 var tooltip = '" . format_hostname($map_devices) . "';
-var marker = L.marker(new L.LatLng(" . $map_devices['lat'] . ', ' . $map_devices['lng'] . "), {title: tooltip, icon: $icon, zIndexOffset: $z_offset});
+var marker = L.marker(new L.LatLng(" . $map_devices['lat'] . ', ' . $map_devices['lng'] . "), {title: tooltip, icon: ".$icon.", zIndexOffset: ".$z_offset."});
 marker.bindPopup(title);
     markers.addLayer(marker);\n";
     }
@@ -229,7 +351,7 @@ marker.bindPopup(title);
         }
 
         foreach (dbFetchRows($sql, $param) as $link) {
-            $icon = 'greenMarker';
+            $icon = 'networkOkMarker';
             $z_offset = 0;
 
             $speed = $link['link_capacity'] / 1000000000;

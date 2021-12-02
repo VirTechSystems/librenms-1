@@ -1,42 +1,97 @@
 <div id="leaflet-map-{{ $id }}" style="width: {{ $dimensions['x'] }}px; height: {{ $dimensions['y'] }}px;"></div>
 
+<style>
+    .criticalCluster {
+        background-color: {{ $critical_circle_color }};
+        text-align: center;
+        width: 25px !important;
+        height: 25px !important;
+        font-size: 14px;
+        color: {{ $critical_icon_color }};
+        border-color: transparent;
+    }
+    .warningCluster {
+        background-color: {{ $warning_circle_color }};
+        text-align: center;
+        width: 25px !important;
+        height: 25px !important;
+        font-size: 14px;
+        color: {{ $warning_icon_color }};
+        border-color: transparent;
+    }
+    .okCluster {
+        background-color: {{ $ok_circle_color }};
+        text-align: center;
+        width: 25px !important;
+        height: 25px !important;
+        font-size: 14px;
+        color: {{ $ok_icon_color }};
+        border-color: transparent;
+    }
+    .maintenanceCluster {
+        background-color: {{ $maintenance_circle_color }};
+        text-align: center;
+        width: 25px !important;
+        height: 25px !important;
+        font-size: 14px;
+        color: {{ $maintenance_icon_color }};
+        border-color: transparent;
+    }
+</style>
 <script type="application/javascript">
     loadjs('js/leaflet.js', function() {
     loadjs('js/leaflet.markercluster.js', function () {
+    loadjs('js/leaflet-openweathermap.js', function() {
     loadjs('js/leaflet.awesome-markers.min.js', function () {
         var map = L.map('leaflet-map-{{ $id }}', { zoomSnap: 0.1 } ).setView(['{{ $init_lat }}', '{{ $init_lng }}'], '{{ sprintf('%01.1f', $init_zoom) }}');
         L.tileLayer('//{{ $title_url }}/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
-
+        
+        if ('{{ $owm_layer }}' == 'rain') {
+            var layer = L.OWM.rain({showLegend: false, opacity: 0.5, appId: '{{ $owm_api }}'}).addTo(map);
+        } else if ('{{ $owm_layer }}' == 'snow') {
+            var layer = L.OWM.snow({showLegend: false, opacity: 0.5, appId: '{{ $owm_api }}'}).addTo(map);
+        } else if ('{{ $owm_layer }}' == 'temperature') {
+            var layer = L.OWM.temperature({showLegend: false, opacity: 0.5, appId: '{{ $owm_api }}'}).addTo(map);
+        } else if ('{{ $owm_layer }}' == 'wind') {
+            var layer = L.OWM.wind({showLegend: false, opacity: 0.5, appId: '{{ $owm_api }}'}).addTo(map);
+        }
+        
+        @foreach($markers as $marker)
+            var {{ $marker["type"] . $marker["state"] }}Marker = L.AwesomeMarkers.icon({
+            icon: '{{ $marker["icon"] }}',
+            markerColor: '{{ $marker["color"] }}', prefix: 'fa', iconColor: '{{ $marker["iconColor"] }}'
+          });
+        @endforeach
+        
         var markers = L.markerClusterGroup({
             maxClusterRadius: '{{ $group_radius }}',
             iconCreateFunction: function (cluster) {
                 var markers = cluster.getAllChildMarkers();
-                var color = "green";
-                var newClass = "Cluster marker-cluster marker-cluster-small leaflet-zoom-animated leaflet-clickable";
+                var zIndex = 20000;
+                var color = "okCluster";
+                var newClass = " marker-cluster marker-cluster-small leaflet-zoom-animated leaflet-clickable";
                 for (var i = 0; i < markers.length; i++) {
-                    if (markers[i].options.icon.options.markerColor == "blue" && color != "red") {
-                        color = "blue";
-                    }
-                    if (markers[i].options.icon.options.markerColor == "red") {
-                        color = "red";
+                    if (markers[i].options.icon.options.markerColor == "{{ $maintenance_circle_color }}" && color != "{{ $critical_circle_color }}" && color != "{{ $warning_circle_color }}") {
+                        color = "maintenanceCluster";
+                        zIndex = 5000;
+                        break;
+                    } else if (markers[i].options.icon.options.markerColor == "{{ $warning_circle_color }}" && color != "{{ $critical_circle_color }}") {
+                        if (markers[i].options.icon != printerWarningMarker) {
+                            color = "warningCluster";
+                            zIndex = 25000;
+                        }
+                    } else if (markers[i].options.icon.options.markerColor == "{{ $critical_circle_color }}") {
+                        if (markers[i].options.icon != printerCriticalMarker) {
+                            color = "criticalCluster";
+                            zIndex = 30000;
+                            break;
+                        }
                     }
                 }
-                return L.divIcon({ html: cluster.getChildCount(), className: color+newClass, iconSize: L.point(40, 40) });
+                return L.divIcon({ html: cluster.getChildCount(), className: color+newClass, iconSize: L.point(40, 40), zIndexOffset: zIndex });
             }
-        });
-        var redMarker = L.AwesomeMarkers.icon({
-            icon: 'server',
-            markerColor: 'red', prefix: 'fa', iconColor: 'white'
-        });
-        var blueMarker = L.AwesomeMarkers.icon({
-            icon: 'server',
-            markerColor: 'blue', prefix: 'fa', iconColor: 'white'
-        });
-        var greenMarker = L.AwesomeMarkers.icon({
-            icon: 'server',
-            markerColor: 'green', prefix: 'fa', iconColor: 'white'
         });
 
         @foreach($devices as $device)
@@ -59,5 +114,5 @@
             });
         });
 
-    });});});
+    });});});});
 </script>

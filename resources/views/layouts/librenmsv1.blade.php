@@ -37,6 +37,7 @@
     <link href="{{ asset('css/MarkerCluster.Default.css') }}" rel="stylesheet">
     <link href="{{ asset('css/L.Control.Locate.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/leaflet.awesome-markers.css') }}" rel="stylesheet">
+	<link href="{{ asset('css/leaflet-openweathermap.css') }}" rel="stylesheet">
     <link href="{{ asset('css/select2.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/select2-bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/query-builder.default.min.css') }}" rel="stylesheet">

@@ -44,6 +44,17 @@
             @endif
         </select>
     </div>
+
+    <div class="form-group">
+        <label for="owm-layer-{{ $id }}" class="control-label">@lang('Weather Layer')</label>
+        <select class="form-control" name="owm_layer" id="owm_layer-{{ $id }}">
+            <option value="none" @if($owm_layer == 'none') selected @endif>@lang('None')</option>
+            <option value="rain" @if($owm_layer == 'rain') selected @endif>@lang('Rain')</option>
+            <option value="snow" @if($owm_layer == 'snow') selected @endif>@lang('Snow')</option>
+            <option value="temperature" @if($owm_layer == 'temperature') selected @endif>@lang('Temperature')</option>
+            <option value="wind" @if($owm_layer == 'wind') selected @endif>@lang('Wind')</option>
+        </select>
+    </div>
 @endsection
 
 @section('javascript')
