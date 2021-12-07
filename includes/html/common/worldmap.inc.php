@@ -52,6 +52,7 @@ if (Config::get('map.engine', 'leaflet') == 'leaflet') {
 
     $owm_api = Config::get('leaflet.owm_api', null);
     $owm_default_layer = Config::get('leaflet.owm_default_layer', 'rain');
+    $owm_legend = Config::get('leaflet.owm_show_legend', true);
     $temp_output = '
 <script src="js/leaflet.js"></script>
 <script src="js/leaflet-openweathermap.js"></script>
@@ -109,27 +110,27 @@ var osm = L.tileLayer(\'//' . $tile_url . '/{z}/{x}/{y}.png\', {
 
 if ($owm_api != null) {
     if ($owm_default_layer == "rain") {
-        $temp_output .= 'var rain = L.OWM.rain({showLegend: false, opacity: 0.5, appId: \''.$owm_api.'\'}).addTo(map);';
+        $temp_output .= 'var rain = L.OWM.rain({showLegend: '.$owm_legend.', opacity: 0.5, appId: \''.$owm_api.'\'}).addTo(map);';
     } else {
-        $temp_output .= 'var rain = L.OWM.rain({showLegend: false, opacity: 0.5, appId: \''.$owm_api.'\'});';
+        $temp_output .= 'var rain = L.OWM.rain({showLegend: '.$owm_legend.', opacity: 0.5, appId: \''.$owm_api.'\'});';
     }
 
     if ($owm_default_layer == "snow") {
-        $temp_output .= 'var snow = L.OWM.snow({showLegend: false, opacity: 0.5, appId: \''.$owm_api.'\'}).addTo(map);';
+        $temp_output .= 'var snow = L.OWM.snow({showLegend: '.$owm_legend.', opacity: 0.5, appId: \''.$owm_api.'\'}).addTo(map);';
     } else {
-        $temp_output .= 'var snow = L.OWM.snow({showLegend: false, opacity: 0.5, appId: \''.$owm_api.'\'});';
+        $temp_output .= 'var snow = L.OWM.snow({showLegend: '.$owm_legend.', opacity: 0.5, appId: \''.$owm_api.'\'});';
     }
     
     if ($owm_default_layer == "temperature") {
-        $temp_output .= 'var temp = L.OWM.temperature({showLegend: false, opacity: 0.5, appId: \''.$owm_api.'\'}).addTo(map);';
+        $temp_output .= 'var temp = L.OWM.temperature({showLegend: '.$owm_legend.', opacity: 0.5, appId: \''.$owm_api.'\'}).addTo(map);';
     } else {
-        $temp_output .= 'var temp = L.OWM.temperature({showLegend: false, opacity: 0.5, appId: \''.$owm_api.'\'});';
+        $temp_output .= 'var temp = L.OWM.temperature({showLegend: '.$owm_legend.', opacity: 0.5, appId: \''.$owm_api.'\'});';
     }
     
     if ($owm_default_layer == "wind") {
-        $temp_output .= 'var wind = L.OWM.wind({showLegend: false, opacity: 0.5, appId: \''.$owm_api.'\'}).addTo(map);';
+        $temp_output .= 'var wind = L.OWM.wind({showLegend: '.$owm_legend.', opacity: 0.5, appId: \''.$owm_api.'\'}).addTo(map);';
     } else {
-        $temp_output .= 'var wind = L.OWM.wind({showLegend: false, opacity: 0.5, appId: \''.$owm_api.'\'});';
+        $temp_output .= 'var wind = L.OWM.wind({showLegend: '.$owm_legend.', opacity: 0.5, appId: \''.$owm_api.'\'});';
     }
     
     $temp_output .= '
